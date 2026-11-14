@@ -317,6 +317,10 @@ footer nav a:hover{color:#fff}
 .viv-load p{font-size:12px;letter-spacing:.24em;text-transform:uppercase;text-align:center;color:var(--ink-2)}
 .viv-head{position:absolute;z-index:5;left:var(--pad);top:clamp(88px,13vh,120px);max-width:min(440px,70vw);pointer-events:none;text-shadow:0 1px 18px rgba(0,0,0,.35)}
 .viv-head .eyebrow{color:#fff;opacity:.85}
+/* Estudio claro: textos sobre la escena en tinta y panel en ciruela translúcido */
+.viv.is-light .viv-head{color:var(--ink);text-shadow:none}.viv.is-light .viv-head .eyebrow{color:var(--ink-2);opacity:1}
+.viv.is-light .vhint{color:var(--ink-2);text-shadow:none;opacity:1}
+.viv.is-light .viv-dock{background:rgba(42,36,48,.62)}
 .viv-head h2{font-size:clamp(28px,3.6vw,48px);line-height:1.06;margin-top:12px}
 .viv-head p{font-size:15px;line-height:1.5;margin-top:10px;opacity:.9}
 .viv.is-fs .viv-head{top:24px}
@@ -986,6 +990,7 @@ const touchDev=matchMedia('(hover: none)').matches;
 
 // Lugares (panoramas generados para la propuesta). h = altura de cámara y r = radio del piso plano de la proyección, ajustados por lugar.
 const PLACES=[
+  {id:'estudio',es:'Estudio',en:'Studio',m:{es:'el estudio',en:'the studio'},rot:0,h:2.6,r:38,studio:true},
   {id:'ciudad',es:'Ciudad',en:'City',m:{es:'la ciudad',en:'the city'},rot:0,h:2.6,r:38},
   {id:'colonia',es:'Colonia',en:'Neighborhood',m:{es:'la colonia',en:'the neighborhood'},rot:0,h:2.6,r:38},
   {id:'carretera',es:'Mirador',en:'Scenic road',m:{es:'el mirador',en:'the scenic road'},rot:0,h:2.6,r:38}
@@ -1019,7 +1024,8 @@ const IC={
   seat:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M5 2.5h3.2l-.7 7H12a1 1 0 0 1 1 1V13H4.6L4 10z"/></svg>'
 };
 IC.wave='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M1 10c1.5-1.4 3-1.4 4.5 0s3 1.4 4.5 0 3-1.4 4.5 0M1 13.2c1.5-1.4 3-1.4 4.5 0s3 1.4 4.5 0 3-1.4 4.5 0"/><circle cx="8" cy="5.2" r="2.2"/></svg>';
-PLACES[0].ic=IC.city;PLACES[1].ic=IC.home;PLACES[2].ic=IC.peak;
+IC.studio='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 9.3 6.7 14.2 8 9.3 9.3 8 14.2 6.7 9.3 1.8 8 6.7 6.7z"/></svg>';
+PLACES[0].ic=IC.studio;PLACES[1].ic=IC.city;PLACES[2].ic=IC.home;PLACES[3].ic=IC.peak;
 const VIEWS=[{id:'ext',es:'Exterior 360°',en:'Exterior 360°',ic:IC.orbit},{id:'move',es:'En movimiento',en:'In motion',ic:IC.wheel},{id:'driver',es:'Conductor',en:'Driver seat',ic:IC.seat},{id:'rear',es:'Fila trasera',en:'Rear seat',ic:IC.seat}];
 // Panel en tres grupos: entorno (lugar + hora), vehículo (color + tapicería) y vista.
 const GROUPS=[{id:'env',es:'Entorno',en:'Setting',ic:IC.mtn,rows:['place','hour']},{id:'car',es:'Vehículo',en:'Vehicle',ic:IC.car,rows:['paint','trim']},{id:'view',es:'Vista',en:'View',ic:IC.eye,rows:['view']}];
@@ -1055,7 +1061,7 @@ function gtHour(){
   let h;try{h=+new Intl.DateTimeFormat('en-US',{timeZone:'America/Guatemala',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()).reduce((a,p)=>p.type==='hour'?a+ +p.value:p.type==='minute'?a+ p.value/60:a,0)}catch(e){h=new Date().getHours()}
   return h>=5&&h<11?'manana':h>=11&&h<15.5?'mediodia':h>=15.5&&h<18.25?'tarde':'noche';
 }
-const st={place:'ciudad',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
+const st={place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
 const lang=()=>document.documentElement.lang==='en'?'en':'es';
 let openHs=null;
 
@@ -1322,7 +1328,27 @@ function loadTex(url){
 // Escritorio con GPU capaz: panorama 6144 px (pano/hd). Celular y doble clic: 4096 px (pano/).
 let panoDir=null;
 const getPanoDir=()=>panoDir??=(!LOCAL&&!matchMedia('(max-width:767px)').matches&&renderer.capabilities.maxTextureSize>=8192&&(navigator.deviceMemory||8)>=4)?'pano/hd/':'pano/';
+// Estudio: entorno sin fotografía, pintado con la paleta del sitio (celestes, perla y rubor). Fondo y reflejos son dos degradados equirectangulares; el de reflejos suma tres paneles de luz suaves.
+const STUDIO={
+  manana:{top:'#b9cbe6',mid:'#dfe6f2',glow:'#f6efee',floor:'#e6e8ef',low:'#d9dde8'},
+  mediodia:{top:'#a2c0e0',mid:'#dce6f3',glow:'#eef0f5',floor:'#e9ebf1',low:'#dde1ea'},
+  tarde:{top:'#b4bfdb',mid:'#e6dbe0',glow:'#f3dccf',floor:'#e7dfdc',low:'#d9cfcd'},
+  noche:{top:'#1c1a2b',mid:'#34314a',glow:'#5d5470',floor:'#2c2836',low:'#211e29'}
+};
+const studioCache={};
+function studioTex(hour,lights){
+  const k=hour+(lights?'L':'');if(studioCache[k])return studioCache[k];
+  const W=2048,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),p=STUDIO[hour];
+  let g=x.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,p.top);g.addColorStop(.36,p.mid);g.addColorStop(.49,p.glow);g.addColorStop(.515,p.floor);g.addColorStop(.8,p.floor);g.addColorStop(1,p.low);
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  if(lights){x.filter='blur(28px)';x.fillStyle=hour==='noche'?'rgba(170,185,230,.55)':'rgba(255,255,255,.95)';
+    for(const u of [.12,.45,.78]){x.beginPath();x.roundRect(u*W-110,150,220,150,30);x.fill()}x.filter='none'}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.mapping=THREE.EquirectangularReflectionMapping;
+  return studioCache[k]=t;
+}
 async function pickPano(place,hour){
+  if(place==='estudio')return {t:studioTex(hour,false),env:studioTex(hour,true),exact:true,studio:true};
   const tries=hour==='noche'?[[`${place}-noche`,true],[`${place}-dia`,false]]:[[`${place}-${hour}`,true],[`${place}-dia`,hour==='mediodia']];
   for(const [name,exact] of tries){try{const t=await loadTex(`${getPanoDir()}${name}.jpg`);return {t,exact}}catch(e){}}
   return null;
@@ -1359,12 +1385,13 @@ async function loadPano(first){
       sky=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:res.t,depthWrite:false}));sky.renderOrder=-1;sky.userData.follow=true;
     }else{sky=new GroundedSkybox(res.t,P.h,P.r);sky.position.y=P.h-0.01}
     sky.rotation.y=P.rot;sky.material.toneMapped=false;sky.visible=!st.drive;scene.add(sky);
-    if(panoEnv)panoEnv.dispose();panoEnv=pmrem.fromEquirectangular(res.t).texture;
+    if(panoEnv)panoEnv.dispose();panoEnv=pmrem.fromEquirectangular(res.env||res.t).texture;
     const gr=GRADE[st.hour];
-    sky.material.color.set(res.exact&&st.hour!=='noche'?0xffffff:res.exact?0xdde3f5:gr.tint);if(floor)floor.material.uniforms.tint.value.copy(sky.material.color);
-    sky.userData={follow:!!P.bg,env:gr.env*(res.exact&&st.hour==='noche'?1.6:1),exp:gr.exp,rot:P.rot,gr};
+    sky.material.color.set(res.studio||res.exact&&st.hour!=='noche'?0xffffff:res.exact?0xdde3f5:gr.tint);if(floor)floor.material.uniforms.tint.value.copy(sky.material.color);
+    sky.userData={follow:!!P.bg,contact:!!res.studio,env:res.studio?(st.hour==='noche'?1.1:1.05):gr.env*(res.exact&&st.hour==='noche'?1.6:1),exp:gr.exp,rot:P.rot,gr};
     if(!st.drive)applyPanoLook();
   }
+  sec.classList.toggle('is-light',!!(res&&res.studio&&st.hour!=='noche'));
   if(first){$('vivLoad').classList.add('done');$('vivFallback').style.display='none'}
   requestAnimationFrame(()=>veil.classList.remove('on'));
 }
@@ -1372,7 +1399,7 @@ function applyPanoLook(){
   if(!sky)return;const u=sky.userData;
   scene.environment=panoEnv;scene.environmentIntensity=u.env;scene.environmentRotation.set(0,u.rot,0);scene.fog=null;
   renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=u.exp;
-  if(contact)contact.visible=!!u.follow;
+  if(contact)contact.visible=!!(u.follow||u.contact);
   sunL.visible=true;sunL.color.set(u.gr.sun);sunL.intensity=u.gr.si;sunL.position.set(...u.gr.sp);
 }
 
@@ -1552,7 +1579,7 @@ async function toggleDrive(on){
       loadPano();
     }
   }catch(e){console.warn('Modo en movimiento no disponible',e);st.drive=false}
-  targetNight=nightFor();sec.classList.toggle('is-drive',st.drive);frameView();syncTexts();updateCta();
+  targetNight=nightFor();sec.classList.toggle('is-drive',st.drive);if(st.drive)sec.classList.remove('is-light');else if(PL().studio&&st.hour!=='noche')sec.classList.add('is-light');frameView();syncTexts();updateCta();
   if(st.view==='ext'){tween=null}
   requestAnimationFrame(()=>veil.classList.remove('on'));driveBusy=false;
 }
