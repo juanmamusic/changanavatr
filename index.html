@@ -377,6 +377,10 @@ footer nav a:hover{color:#fff}
 .vchip{flex:0 0 auto;scroll-snap-align:start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;font:500 14px var(--font);cursor:pointer;white-space:nowrap;transition:background .3s,color .3s,border-color .3s}
 .vchip:hover{border-color:rgba(255,255,255,.5)}
 .vchip[aria-checked="true"],.vchip[aria-pressed="true"]{background:#fff;color:var(--plum);border-color:#fff}
+.vzoom{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,color .2s}
+.vzoom svg{width:18px;height:18px}.vzoom:hover{background:rgba(255,255,255,.14)}.vzoom[aria-pressed="true"]{background:#fff;color:var(--plum);border-color:#fff}
+.vact .vzoom{width:44px;height:44px}.vact .vzoom.m{display:none}
+@media(max-width:767px){.vopts .vzoom{display:none}.vact .vzoom.m:not([hidden]){display:inline-flex}}
 .vtoast{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,6px);background:rgba(14,11,17,.78);color:#fff;font-size:13px;padding:8px 14px;border-radius:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
 .vtoast.on{opacity:1;transform:translate(-50%,0)}
 .vchip .dot{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 -3px 5px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.4)}
@@ -486,6 +490,7 @@ en tu mundo.</h2>
       <button type="button" class="gbtn" id="vivMotion" aria-pressed="true" aria-label="Pausar movimiento" data-i18n-aria="v_pausem">
         <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>
       </button>
+      <button type="button" class="vzoom m" id="vivZoomM" aria-pressed="false" aria-label="Acercar" hidden></button>
       <button type="button" class="gbtn" id="vivFs" aria-label="Pantalla completa" data-i18n-aria="v_fs">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg>
       </button>
@@ -1063,12 +1068,12 @@ const GRADE={
 };
 const TX={
   es:{hint:'Arrastra para girar',hintIn:'Arrastra para mirar alrededor',hintDrive:touchDev?'Desliza para conducir':'Mueve el mouse para conducir',
-      fs:'Pantalla completa',fsx:'Salir de pantalla completa',pause:'Pausar movimiento',play:'Reanudar movimiento',
+      fs:'Pantalla completa',fsx:'Salir de pantalla completa',zin:'Acercar',zout:'Alejar',pause:'Pausar movimiento',play:'Reanudar movimiento',
       drive:'Verlo en movimiento',stop:'Detener',note:'Paisajes de referencia generados para la propuesta.',noteDrive:'En movimiento: carretera entre volcanes.',placeOnly:'El lugar solo se puede cambiar en la vista Exterior 360°.',
       tagline:'Inteligencia y serenidad',park:'Estacionada',range:'Autonomía',
       msg:(c,p,h,t)=>`Hola, me interesa la AVATR 11 en ${c} con interior ${t.toLowerCase()}. La vi en ${p}${h?' ('+h.toLowerCase()+')':''} en el sitio y quiero agendar una experiencia privada.`,nogl:'Tu navegador no muestra 3D. Te dejamos una foto de la AVATR 11.'},
   en:{hint:'Drag to rotate',hintIn:'Drag to look around',hintDrive:touchDev?'Swipe to steer':'Move the mouse to steer',
-      fs:'Full screen',fsx:'Exit full screen',pause:'Pause motion',play:'Resume motion',
+      fs:'Full screen',fsx:'Exit full screen',zin:'Zoom in',zout:'Zoom out',pause:'Pause motion',play:'Resume motion',
       drive:'See it in motion',stop:'Stop',note:'Reference landscapes generated for this proposal.',noteDrive:'In motion: a road between volcanoes.',placeOnly:'The place can only be changed in the Exterior 360° view.',
       tagline:'Intelligence and serenity',park:'Parked',range:'Range',
       msg:(c,p,h,t)=>`Hi, I’m interested in the AVATR 11 in ${c} with the ${t.toLowerCase()} interior. I saw it in ${p}${h?' ('+h.toLowerCase()+')':''} on the website and I’d like to book a private experience.`,nogl:'Your browser can’t show 3D. Here is a photo of the AVATR 11.'}
@@ -1078,7 +1083,7 @@ function gtHour(){
   let h;try{h=+new Intl.DateTimeFormat('en-US',{timeZone:'America/Guatemala',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()).reduce((a,p)=>p.type==='hour'?a+ +p.value:p.type==='minute'?a+ p.value/60:a,0)}catch(e){h=new Date().getHours()}
   return h>=5&&h<11?'manana':h>=11&&h<15.5?'mediodia':h>=15.5&&h<18.25?'tarde':'noche';
 }
-const st={open:{front:false,rear:false,trunk:false,frunk:false},place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
+const st={zoom:false,lastOpen:null,open:{front:false,rear:false,trunk:false,frunk:false},place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
 const lang=()=>document.documentElement.lang==='en'?'en':'es';
 let openHs=null;
 
@@ -1119,14 +1124,22 @@ function renderOpts(){
       b.onclick=()=>{r==='view'?setView(o.id):r==='open'?toggleOpen(o.id):set(r,o.id)};
       box.append(b);
     });
+    if(r==='view'){const z=zoomBtn();z.className='vzoom';if(st.view!=='ext'||st.drive){z.style.visibility='hidden';z.tabIndex=-1}box.append(z)}
     row.append(box);pane.append(row);
     // La nota se reserva siempre (oculta fuera de movimiento) para que el panel no cambie de alto.
     if(r==='place'){const n=document.createElement('p');n.className='voff';n.textContent=TX[L].placeOnly;if(!off){n.style.visibility='hidden';n.setAttribute('aria-hidden','true')}pane.append(n)}
     const on=box.querySelector('[aria-checked="true"]');if(act&&on)requestAnimationFrame(()=>{const l=on.offsetLeft-box.offsetLeft;if(l<box.scrollLeft||l+on.offsetWidth>box.scrollLeft+box.clientWidth)box.scrollLeft=l-8});
   });
   });
+  const zm=$('vivZoomM');if(zm){zm.hidden=!(st.view==='ext'&&!st.drive);zm.innerHTML=zoomBtn().innerHTML;zm.setAttribute('aria-pressed',st.zoom);zm.setAttribute('aria-label',TX[L][st.zoom?'zout':'zin']);zm.title=zm.getAttribute('aria-label')}
   try{if(E.ready)requestAnimationFrame(frameView)}catch(e){}
 }
+// Zoom de Exterior 360°: acerca la cámara y apunta a lo que esté abierto.
+const ZIN='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.6 12.6 17 17M8.5 6v5M6 8.5h5"/></svg>';
+const ZOUT='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.6 12.6 17 17M6 8.5h5"/></svg>';
+function zoomBtn(){const L=lang(),b=document.createElement('button');b.type='button';b.innerHTML=st.zoom?ZOUT:ZIN;b.setAttribute('aria-pressed',st.zoom);b.setAttribute('aria-label',TX[L][st.zoom?'zout':'zin']);b.title=b.getAttribute('aria-label');b.onclick=toggleZoom;return b}
+function toggleZoom(){if(!E.ready||st.drive||st.view!=='ext')return;st.zoom=!st.zoom;idle=0;renderOpts()}
+const ZFOCUS={none:[0,.62,0],front:[.55,.85,.45],rear:[.55,.85,-.45],trunk:[0,.85,-1.7],frunk:[0,.8,1.65]};
 function updateCta(){
   const L=lang();const c=PAINTS.find(p=>p.id===st.paint)[L],p=st.drive?(L==='es'?'la carretera':'the road'):PL().m[L],h=HOURS.find(p=>p.id===st.hour)[L],t=TRIMS.find(x=>x.id===st.trim)[L];
   cta.href='https://wa.me/'+WA+'?text='+encodeURIComponent(TX[L].msg(c,p,h,t));
@@ -1142,6 +1155,7 @@ function set(k,v){
 }
 async function setView(id){
   if(!E.ready)return;
+  if(id!=='ext'&&st.zoom){st.zoom=false;renderOpts()}
   if(id!=='ext'&&anyOpen()){closeAll();await new Promise(r=>setTimeout(r,850))}
   if(id==='move'||id==='ext'){const wantDrive=id==='move';if(st.drive!==wantDrive)await toggleDrive(wantDrive);if(st.view!=='ext'){st.view='ext';goView('ext')}}
   else if(st.view!==id){st.view=id;goView(id)}
@@ -1153,7 +1167,9 @@ const anyOpen=()=>Object.values(st.open).some(Boolean);
 function closeAll(){for(const k in st.open)st.open[k]=false;renderOpts()}
 function toggleOpen(id){
   if(!E.ready||st.drive||st.view!=='ext')return;
-  st.open[id]=!st.open[id];renderOpts();
+  st.open[id]=!st.open[id];
+  if(st.open[id])st.lastOpen=id;else if(st.lastOpen===id)st.lastOpen=OPENS.map(o=>o.id).find(k=>st.open[k])||null;
+  renderOpts();
   if(st.open[id]){camAzGoal=OPENS.find(o=>o.id===id).az;idle=0}
 }
 function hintText(){const L=lang();return st.view!=='ext'?TX[L].hintIn:st.drive?TX[L].hintDrive:TX[L].hint}
@@ -1168,6 +1184,7 @@ function syncTexts(){
 window.addEventListener('avlang',syncTexts);
 syncTexts();
 xBtn.onclick=()=>setView(st.drive?'move':'ext');
+if($('vivZoomM'))$('vivZoomM').onclick=toggleZoom;
 
 /* Movimiento y pantalla completa */
 const ICON_P='<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>';
@@ -1627,11 +1644,13 @@ async function toggleDrive(on){
 /* ===== Cámara ===== */
 const camState={az:.75,pol:1.36,dist:9.6,target:new THREE.Vector3(0,.42,0),yaw:0,pitch:0};
 const EYES={driver:{p:new THREE.Vector3(.38,1.3,-.3),yaw:-.08,pitch:-.2},rear:{p:new THREE.Vector3(.32,1.27,-1.22),yaw:-.1,pitch:-.14}};
+const zoomFocus=new THREE.Vector3(...ZFOCUS.none),zGoal=new THREE.Vector3(),tgt=new THREE.Vector3();let zk=0;
 let tween=null,idle=0,dragging=false,steerX=0,carZ=0,vz=0,lastSteer=-1e9;
 const lv=new THREE.Vector3();
 function extPose(out,look){
   if(st.drive){const port=W<H,steer=driveSteer;out.set(port?11.5:9.4,port?2.3:1.95,(port?8.8:7.1)-steer*.8);look.set(0,.8,carZ*.6);return}
-  const s=Math.sin(camState.pol);out.set(camState.target.x+camState.dist*s*Math.sin(camState.az),camState.target.y+camState.dist*Math.cos(camState.pol),camState.target.z+camState.dist*s*Math.cos(camState.az));look.copy(camState.target)}
+  const pol=Math.min(1.55,camState.pol+.07*zk),d=camState.dist*(1-.36*zk),s=Math.sin(pol);tgt.lerpVectors(camState.target,zoomFocus,zk);
+  out.set(tgt.x+d*s*Math.sin(camState.az),tgt.y+d*Math.cos(pol),tgt.z+d*s*Math.cos(camState.az));look.copy(tgt)}
 function intPose(out,look){const e=EYES[st.view];out.copy(e.p);const cy=Math.cos(camState.pitch);look.set(e.p.x+Math.sin(camState.yaw)*cy,e.p.y+Math.sin(camState.pitch),e.p.z+Math.cos(camState.yaw)*cy);
   if(st.drive){car.updateMatrixWorld();out.applyMatrix4(car.matrixWorld);look.applyMatrix4(car.matrixWorld)}}
 const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -1713,6 +1732,8 @@ function frame(){
     if(st.drive&&st.view!=='ext')camera.position.copy(P);else camera.position.lerp(P,st.drive?1-Math.exp(-3*dt):dragging?.35:.12);
     camera.lookAt(Lk)}
   curNight+=(targetNight-curNight)*Math.min(1,dt*2.2);
+  {const want=st.zoom&&st.view==='ext'&&!st.drive?1:0;zk+=(want-zk)*Math.min(1,dt*2.4);if(Math.abs(want-zk)<.001)zk=want;
+   zGoal.set(...ZFOCUS[st.zoom&&st.lastOpen?st.lastOpen:'none']);zoomFocus.lerp(zGoal,Math.min(1,dt*2.4))}
   if(opener.parts.length){const qa=new THREE.Quaternion();
     for(const k in opener.amt){const want=st.open[k]?1:0;opener.amt[k]+=(want-opener.amt[k])*Math.min(1,dt*3.2);if(Math.abs(want-opener.amt[k])<.001)opener.amt[k]=want}
     for(const p of opener.parts){const a=opener.amt[p.k],e=a<.5?2*a*a:1-Math.pow(-2*a+2,2)/2;
