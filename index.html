@@ -1124,7 +1124,7 @@ function renderOpts(){
       b.onclick=()=>{r==='view'?setView(o.id):r==='open'?toggleOpen(o.id):set(r,o.id)};
       box.append(b);
     });
-    if(r==='view'){const z=zoomBtn();z.className='vzoom';if(st.view!=='ext'||st.drive){z.style.visibility='hidden';z.tabIndex=-1}box.append(z)}
+    if(r==='view'){const z=zoomBtn();z.className='vzoom';if(st.view!=='ext'||st.drive){z.style.visibility='hidden';z.tabIndex=-1}box.firstChild.after(z)}
     row.append(box);pane.append(row);
     // La nota se reserva siempre (oculta fuera de movimiento) para que el panel no cambie de alto.
     if(r==='place'){const n=document.createElement('p');n.className='voff';n.textContent=TX[L].placeOnly;if(!off){n.style.visibility='hidden';n.setAttribute('aria-hidden','true')}pane.append(n)}
@@ -1649,7 +1649,7 @@ let tween=null,idle=0,dragging=false,steerX=0,carZ=0,vz=0,lastSteer=-1e9;
 const lv=new THREE.Vector3();
 function extPose(out,look){
   if(st.drive){const port=W<H,steer=driveSteer;out.set(port?11.5:9.4,port?2.3:1.95,(port?8.8:7.1)-steer*.8);look.set(0,.8,carZ*.6);return}
-  const pol=Math.min(1.55,camState.pol+.07*zk),d=camState.dist*(1-.36*zk),s=Math.sin(pol);tgt.lerpVectors(camState.target,zoomFocus,zk);
+  const pol=Math.min(1.55,camState.pol+.07*zk),d=camState.dist*(1-.46*zk),s=Math.sin(pol);tgt.lerpVectors(camState.target,zoomFocus,zk);
   out.set(tgt.x+d*s*Math.sin(camState.az),tgt.y+d*Math.cos(pol),tgt.z+d*s*Math.cos(camState.az));look.copy(tgt)}
 function intPose(out,look){const e=EYES[st.view];out.copy(e.p);const cy=Math.cos(camState.pitch);look.set(e.p.x+Math.sin(camState.yaw)*cy,e.p.y+Math.sin(camState.pitch),e.p.z+Math.cos(camState.yaw)*cy);
   if(st.drive){car.updateMatrixWorld();out.applyMatrix4(car.matrixWorld);look.applyMatrix4(car.matrixWorld)}}
