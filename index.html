@@ -376,7 +376,9 @@ footer nav a:hover{color:#fff}
 .vopts{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px;scroll-snap-type:x proximity}
 .vchip{flex:0 0 auto;scroll-snap-align:start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;font:500 14px var(--font);cursor:pointer;white-space:nowrap;transition:background .3s,color .3s,border-color .3s}
 .vchip:hover{border-color:rgba(255,255,255,.5)}
-.vchip[aria-checked="true"]{background:#fff;color:var(--plum);border-color:#fff}
+.vchip[aria-checked="true"],.vchip[aria-pressed="true"]{background:#fff;color:var(--plum);border-color:#fff}
+.vtoast{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,6px);background:rgba(14,11,17,.78);color:#fff;font-size:13px;padding:8px 14px;border-radius:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+.vtoast.on{opacity:1;transform:translate(-50%,0)}
 .vchip .dot{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 -3px 5px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.4)}
 .vchip svg{width:16px;height:16px}
 .vcta{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;border:0;background:var(--blush);color:var(--plum);font:600 14px var(--font);cursor:pointer;text-decoration:none;transition:background .3s}
@@ -1031,10 +1033,20 @@ const IC={
 IC.wave='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M1 10c1.5-1.4 3-1.4 4.5 0s3 1.4 4.5 0 3-1.4 4.5 0M1 13.2c1.5-1.4 3-1.4 4.5 0s3 1.4 4.5 0 3-1.4 4.5 0"/><circle cx="8" cy="5.2" r="2.2"/></svg>';
 IC.studio='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 9.3 6.7 14.2 8 9.3 9.3 8 14.2 6.7 9.3 1.8 8 6.7 6.7z"/></svg>';
 PLACES[0].ic=IC.studio;PLACES[1].ic=IC.city;PLACES[2].ic=IC.home;PLACES[3].ic=IC.peak;
+IC.door='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 14V5.5L7.5 2H13v12z"/><path d="M3 8h10M10.5 10.5h1.2"/></svg>';
+IC.trunk='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 11.5h13v2h-13zM2.5 11.5 4 8h6.5l3 3.5"/><path d="M10.5 8 13 3.5"/></svg>';
+IC.frunk='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 11.5h13v2h-13zM13.5 11.5 12 8H5.5l-3 3.5"/><path d="M5.5 8 3 3.5"/></svg>';
+// Aperturas (solo Exterior 360°): nodos con bisagra propia en el modelo, eje y ángulo de apertura en radianes.
+const OPENS=[
+  {id:'front',es:'Puertas delanteras',en:'Front doors',ic:IC.door,nodes:[['Door_LF','y',-1.05],['Door_RF','y',1.05]],az:1.0},
+  {id:'rear',es:'Puertas traseras',en:'Rear doors',ic:IC.door,nodes:[['Door_LB','y',-1.05],['Door_RB','y',1.05]],az:1.85},
+  {id:'trunk',es:'Baúl',en:'Trunk',ic:IC.trunk,nodes:[['Trunk_Body','x',1.15]],az:2.65,hide:['Trunk_Stents']},
+  {id:'frunk',es:'Maletero delantero',en:'Front trunk',ic:IC.frunk,nodes:[['Frunk_Body','x',-.95]],az:.45,hide:['Frunk_Stents']}
+];
 const VIEWS=[{id:'ext',es:'Exterior 360°',en:'Exterior 360°',ic:IC.orbit},{id:'move',es:'En movimiento',en:'In motion',ic:IC.wheel},{id:'driver',es:'Conductor',en:'Driver seat',ic:IC.seat},{id:'rear',es:'Fila trasera',en:'Rear seat',ic:IC.seat}];
 // Panel en tres grupos: entorno (lugar + hora), vehículo (color + tapicería) y vista.
 const GROUPS=[{id:'env',es:'Entorno',en:'Setting',ic:IC.mtn,rows:['place','hour']},{id:'car',es:'Vehículo',en:'Vehicle',ic:IC.car,rows:['paint','trim']},{id:'view',es:'Vista',en:'View',ic:IC.eye,rows:['view']}];
-const ROWS={place:{es:'Lugar',en:'Place',list:PLACES},hour:{es:'Hora',en:'Time',list:HOURS},paint:{es:'Color',en:'Color',list:PAINTS},trim:{es:'Tapicería',en:'Upholstery',list:TRIMS},view:{es:'Vista',en:'View',list:VIEWS}};
+const ROWS={place:{es:'Lugar',en:'Place',list:PLACES},hour:{es:'Hora',en:'Time',list:HOURS},paint:{es:'Color',en:'Color',list:PAINTS},trim:{es:'Tapicería',en:'Upholstery',list:TRIMS},view:{es:'Vista',en:'View',list:VIEWS},open:{es:'Abrir',en:'Open',list:OPENS}};
 const HOTSPOTS=[
   {id:'screen',p:[0.0,1.12,0.6],es:['Pantalla central','Clima, navegación y entretenimiento al alcance de un toque o de tu voz.'],en:['Central screen','Climate, navigation and entertainment at a touch or with your voice.']},
   {id:'wheel',p:[0.39,1.07,0.47],es:['Volante','Controles al alcance de tus pulgares para no soltar el camino.'],en:['Steering wheel','Controls at your thumbs so you never let go of the road.']},
@@ -1066,7 +1078,7 @@ function gtHour(){
   let h;try{h=+new Intl.DateTimeFormat('en-US',{timeZone:'America/Guatemala',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()).reduce((a,p)=>p.type==='hour'?a+ +p.value:p.type==='minute'?a+ p.value/60:a,0)}catch(e){h=new Date().getHours()}
   return h>=5&&h<11?'manana':h>=11&&h<15.5?'mediodia':h>=15.5&&h<18.25?'tarde':'noche';
 }
-const st={place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
+const st={open:{front:false,rear:false,trunk:false,frunk:false},place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
 const lang=()=>document.documentElement.lang==='en'?'en':'es';
 let openHs=null;
 
@@ -1088,22 +1100,23 @@ function renderOpts(){
   const pane=document.createElement('div');pane.className='vpane';const act=g.id===st.tab;
   if(!act){pane.hidden=false;pane.setAttribute('aria-hidden','true');pane.inert=true}else pane.classList.add('on');
   optsEl.append(pane);
-  // En Vista se agrega la fila Hora: visible solo en movimiento, pero siempre reservada para que el panel no cambie de alto.
-  const rows=g.id==='view'?['view','hour']:g.rows;
+  // En Vista, la segunda fila es Hora en movimiento y Abrir en Exterior 360°; en el interior queda reservada para que el panel no cambie de alto.
+  const rows=g.id==='view'?['view',st.drive?'hour':'open']:g.rows;
   rows.forEach(r=>{
     const R=ROWS[r],row=document.createElement('div');row.className='vrowg';
-    if(g.id==='view'&&r==='hour'&&!st.drive){row.style.visibility='hidden';row.setAttribute('aria-hidden','true');row.inert=true}
+    if(r==='open'&&st.view!=='ext'){row.style.visibility='hidden';row.setAttribute('aria-hidden','true');row.inert=true}
     if(rows.length>1){const lab=document.createElement('p');lab.className='vlab';lab.textContent=R[L];row.append(lab)}
-    const box=document.createElement('div');box.className='vopts'+(r==='view'?' vgrid':'');box.setAttribute('role','radiogroup');box.setAttribute('aria-label',R[L]);
+    const box=document.createElement('div');box.className='vopts'+(r==='view'?' vgrid':'');box.setAttribute('role',r==='open'?'group':'radiogroup');box.setAttribute('aria-label',R[L]);
     const cur=r==='view'?viewSel():st[r];const off=r==='place'&&st.drive;
     R.list.forEach(o=>{
-      const b=document.createElement('button');b.type='button';b.className='vchip';b.setAttribute('role','radio');b.setAttribute('aria-checked',cur===o.id);
+      const b=document.createElement('button');b.type='button';b.className='vchip';
+      if(r==='open')b.setAttribute('aria-pressed',!!st.open[o.id]);else{b.setAttribute('role','radio');b.setAttribute('aria-checked',cur===o.id)}
       if(off){b.disabled=true;b.setAttribute('aria-checked','false')}
       if(o.sw){const d=document.createElement('i');d.className='dot';d.style.background=o.sw;b.append(d)}
       if(r==='hour')b.insertAdjacentHTML('beforeend',o.id==='noche'?MOON:SUN);
       if(o.ic)b.insertAdjacentHTML('beforeend',o.ic);
       b.append(o[L]);
-      b.onclick=()=>{r==='view'?setView(o.id):set(r,o.id)};
+      b.onclick=()=>{r==='view'?setView(o.id):r==='open'?toggleOpen(o.id):set(r,o.id)};
       box.append(b);
     });
     row.append(box);pane.append(row);
@@ -1129,9 +1142,19 @@ function set(k,v){
 }
 async function setView(id){
   if(!E.ready)return;
+  if(id!=='ext'&&anyOpen()){closeAll();await new Promise(r=>setTimeout(r,850))}
   if(id==='move'||id==='ext'){const wantDrive=id==='move';if(st.drive!==wantDrive)await toggleDrive(wantDrive);if(st.view!=='ext'){st.view='ext';goView('ext')}}
   else if(st.view!==id){st.view=id;goView(id)}
   renderOpts();updateCta();
+}
+/* Aperturas: puertas, baúl y maletero delantero */
+const opener={parts:[],amt:{front:0,rear:0,trunk:0,frunk:0}};let camAzGoal=null;
+const anyOpen=()=>Object.values(st.open).some(Boolean);
+function closeAll(){for(const k in st.open)st.open[k]=false;renderOpts()}
+function toggleOpen(id){
+  if(!E.ready||st.drive||st.view!=='ext')return;
+  st.open[id]=!st.open[id];renderOpts();
+  if(st.open[id]){camAzGoal=OPENS.find(o=>o.id===id).az;idle=0}
 }
 function hintText(){const L=lang();return st.view!=='ext'?TX[L].hintIn:st.drive?TX[L].hintDrive:TX[L].hint}
 function syncTexts(){
@@ -1260,6 +1283,9 @@ function onCar(root){
     const c=new THREE.Box3().setFromObject(tire).getCenter(new THREE.Vector3());
     const piv=new THREE.Object3D();piv.position.copy(c);car.add(piv);car.updateMatrixWorld(true);parts.forEach(p=>piv.attach(p));wheels.push(piv);
   }
+  // Bisagras de puertas, baúl y maletero delantero
+  OPENS.forEach(o=>{o.nodes.forEach(([n,ax,ang])=>{const node=car.getObjectByName(n);if(node)opener.parts.push({k:o.id,node,base:node.quaternion.clone(),axis:new THREE.Vector3(ax==='x'?1:0,ax==='y'?1:0,0),ang})});
+    (o.hide||[]).forEach(n=>{const node=car.getObjectByName(n);if(node)opener.parts.push({k:o.id,node,hide:true})})});
   // Haz de luz de los faros sobre el piso (hijo del auto: sirve estacionada y en movimiento)
   const c=document.createElement('canvas');c.width=256;c.height=256;const x=c.getContext('2d');
   const gr=x.createRadialGradient(128,40,8,128,90,200);gr.addColorStop(0,'rgba(255,248,235,.9)');gr.addColorStop(.45,'rgba(255,240,220,.28)');gr.addColorStop(1,'rgba(255,240,220,0)');x.fillStyle=gr;x.fillRect(0,0,256,256);
@@ -1626,7 +1652,7 @@ function bindPointer(){
   const cv=renderer.domElement;const pts=new Map();let lastPinch=0;
   // En movimiento: el mouse (sin hacer clic) conduce, como en el sitio de Changan.
   sec.addEventListener('pointermove',e=>{if(!st.drive||st.view!=='ext'||e.pointerType==='touch')return;const r=sec.getBoundingClientRect();steerX=THREE.MathUtils.clamp((e.clientX-r.left)/r.width*2-1,-1,1);lastSteer=performance.now();hint.classList.add('off')},{passive:true});
-  cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});dragging=true;idle=0;hint.classList.add('off');cv.setPointerCapture?.(e.pointerId)});
+  cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});dragging=true;camAzGoal=null;idle=0;hint.classList.add('off');cv.setPointerCapture?.(e.pointerId)});
   cv.addEventListener('pointermove',e=>{
     const p=pts.get(e.pointerId);if(!p)return;
     const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;idle=0;
@@ -1687,6 +1713,12 @@ function frame(){
     if(st.drive&&st.view!=='ext')camera.position.copy(P);else camera.position.lerp(P,st.drive?1-Math.exp(-3*dt):dragging?.35:.12);
     camera.lookAt(Lk)}
   curNight+=(targetNight-curNight)*Math.min(1,dt*2.2);
+  if(opener.parts.length){const qa=new THREE.Quaternion();
+    for(const k in opener.amt){const want=st.open[k]?1:0;opener.amt[k]+=(want-opener.amt[k])*Math.min(1,dt*3.2);if(Math.abs(want-opener.amt[k])<.001)opener.amt[k]=want}
+    for(const p of opener.parts){const a=opener.amt[p.k],e=a<.5?2*a*a:1-Math.pow(-2*a+2,2)/2;
+      if(p.hide){p.node.visible=a<.02;continue}
+      p.node.quaternion.copy(p.base).multiply(qa.setFromAxisAngle(p.axis,p.ang*e))}}
+  if(camAzGoal!=null&&!dragging&&st.view==='ext'&&!st.drive){let d=camAzGoal-camState.az;d=Math.atan2(Math.sin(d),Math.cos(d));camState.az+=d*Math.min(1,dt*2.2);idle=0;if(Math.abs(d)<.01)camAzGoal=null}
   const breathe=.92+.08*Math.sin(clock.elapsedTime*1.4);
   lightMats.forEach(m=>m.opacity=Math.min(1,.05+curNight*.9)*breathe);
   if(beam)beam.material.opacity=curNight>.6?(curNight-.6)*1.6*.55:0;
