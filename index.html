@@ -1048,10 +1048,15 @@ const OPENS=[
   {id:'trunk',es:'Baúl',en:'Trunk',ic:IC.trunk,nodes:[['Trunk_Body','x',1.15]],az:2.65,hide:['Trunk_Stents']},
   {id:'frunk',es:'Maletero delantero',en:'Front trunk',ic:IC.frunk,nodes:[['Frunk_Body','x',-.95]],az:.45,hide:['Frunk_Stents']}
 ];
+IC.camSide='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M2 10.5 3.3 7.6A1.5 1.5 0 0 1 4.7 6.7h6.6a1.5 1.5 0 0 1 1.4.9L14 10.5V12H2z"/><circle cx="4.8" cy="12" r="1.1"/><circle cx="11.2" cy="12" r="1.1"/></svg>';
+IC.camChase='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 13V8.5L5 5h6l1.5 3.5V13z"/><path d="M3.5 9.5h9M5.5 11.2h1M9.5 11.2h1"/></svg>';
+IC.camAir='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.6" y="6" width="4.8" height="4" rx="1"/><path d="M5.6 7 3 4.5M10.4 7 13 4.5M5.6 9 3 11.5M10.4 9 13 11.5"/><circle cx="3" cy="4.5" r="1.3"/><circle cx="13" cy="4.5" r="1.3"/><circle cx="3" cy="11.5" r="1.3"/><circle cx="13" cy="11.5" r="1.3"/></svg>';
+// Cámaras del modo En movimiento
+const CAMS=[{id:'side',es:'Lateral',en:'Side',ic:IC.camSide},{id:'chase',es:'Persecución',en:'Chase',ic:IC.camChase},{id:'aerial',es:'Aérea',en:'Aerial',ic:IC.camAir}];
 const VIEWS=[{id:'ext',es:'Exterior 360°',en:'Exterior 360°',ic:IC.orbit},{id:'move',es:'En movimiento',en:'In motion',ic:IC.wheel},{id:'driver',es:'Conductor',en:'Driver seat',ic:IC.seat},{id:'rear',es:'Fila trasera',en:'Rear seat',ic:IC.seat}];
 // Panel en tres grupos: entorno (lugar + hora), vehículo (color + tapicería) y vista.
 const GROUPS=[{id:'env',es:'Entorno',en:'Setting',ic:IC.mtn,rows:['place','hour']},{id:'car',es:'Vehículo',en:'Vehicle',ic:IC.car,rows:['paint','trim']},{id:'view',es:'Vista',en:'View',ic:IC.eye,rows:['view']}];
-const ROWS={place:{es:'Lugar',en:'Place',list:PLACES},hour:{es:'Hora',en:'Time',list:HOURS},paint:{es:'Color',en:'Color',list:PAINTS},trim:{es:'Tapicería',en:'Upholstery',list:TRIMS},view:{es:'Vista',en:'View',list:VIEWS},open:{es:'Abrir',en:'Open',list:OPENS}};
+const ROWS={place:{es:'Lugar',en:'Place',list:PLACES},hour:{es:'Hora',en:'Time',list:HOURS},paint:{es:'Color',en:'Color',list:PAINTS},trim:{es:'Tapicería',en:'Upholstery',list:TRIMS},view:{es:'Vista',en:'View',list:VIEWS},open:{es:'Abrir',en:'Open',list:OPENS},dcam:{es:'Cámara',en:'Camera',list:CAMS}};
 const HOTSPOTS=[
   {id:'screen',p:[0.0,1.12,0.6],es:['Pantalla central','Clima, navegación y entretenimiento al alcance de un toque o de tu voz.'],en:['Central screen','Climate, navigation and entertainment at a touch or with your voice.']},
   {id:'wheel',p:[0.39,1.07,0.47],es:['Volante','Controles al alcance de tus pulgares para no soltar el camino.'],en:['Steering wheel','Controls at your thumbs so you never let go of the road.']},
@@ -1083,7 +1088,7 @@ function gtHour(){
   let h;try{h=+new Intl.DateTimeFormat('en-US',{timeZone:'America/Guatemala',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()).reduce((a,p)=>p.type==='hour'?a+ +p.value:p.type==='minute'?a+ p.value/60:a,0)}catch(e){h=new Date().getHours()}
   return h>=5&&h<11?'manana':h>=11&&h<15.5?'mediodia':h>=15.5&&h<18.25?'tarde':'noche';
 }
-const st={zoom:false,lastOpen:null,open:{front:false,rear:false,trunk:false,frunk:false},place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
+const st={dcam:'side',zoom:false,lastOpen:null,open:{front:false,rear:false,trunk:false,frunk:false},place:'estudio',hour:gtHour(),paint:'lc',trim:'crema',view:'ext',tab:'env',moving:!reduce,drive:false,prevView:'ext'};
 const lang=()=>document.documentElement.lang==='en'?'en':'es';
 let openHs=null;
 
@@ -1105,11 +1110,11 @@ function renderOpts(){
   const pane=document.createElement('div');pane.className='vpane';const act=g.id===st.tab;
   if(!act){pane.hidden=false;pane.setAttribute('aria-hidden','true');pane.inert=true}else pane.classList.add('on');
   optsEl.append(pane);
-  // En Vista, la segunda fila es Hora en movimiento y Abrir en Exterior 360°; en el interior queda reservada para que el panel no cambie de alto.
-  const rows=g.id==='view'?['view',st.drive?'hour':'open']:g.rows;
+  // Vista: en Exterior 360° la segunda fila es Abrir; en movimiento son Cámara y Hora. Las filas que no aplican quedan reservadas para que el panel no cambie de alto.
+  const rows=g.id==='view'?['view',st.drive?'dcam':'open','hour']:g.rows;
   rows.forEach(r=>{
     const R=ROWS[r],row=document.createElement('div');row.className='vrowg';
-    if(r==='open'&&st.view!=='ext'){row.style.visibility='hidden';row.setAttribute('aria-hidden','true');row.inert=true}
+    if((r==='open'&&st.view!=='ext')||(r==='dcam'&&st.view!=='ext')||(g.id==='view'&&r==='hour'&&!st.drive)){row.style.visibility='hidden';row.setAttribute('aria-hidden','true');row.inert=true}
     if(rows.length>1){const lab=document.createElement('p');lab.className='vlab';lab.textContent=R[L];row.append(lab)}
     const box=document.createElement('div');box.className='vopts'+(r==='view'?' vgrid':'');box.setAttribute('role',r==='open'?'group':'radiogroup');box.setAttribute('aria-label',R[L]);
     const cur=r==='view'?viewSel():st[r];const off=r==='place'&&st.drive;
@@ -1124,7 +1129,7 @@ function renderOpts(){
       b.onclick=()=>{r==='view'?setView(o.id):r==='open'?toggleOpen(o.id):set(r,o.id)};
       box.append(b);
     });
-    if(r==='view'){const z=zoomBtn();z.className='vzoom';if(st.view!=='ext'||st.drive){z.style.visibility='hidden';z.tabIndex=-1}box.firstChild.after(z)}
+    if(r==='view'){const z=zoomBtn();z.className='vzoom';if(st.view!=='ext'||st.drive)z.style.display='none';box.firstChild.after(z)}
     row.append(box);pane.append(row);
     // La nota se reserva siempre (oculta fuera de movimiento) para que el panel no cambie de alto.
     if(r==='place'){const n=document.createElement('p');n.className='voff';n.textContent=TX[L].placeOnly;if(!off){n.style.visibility='hidden';n.setAttribute('aria-hidden','true')}pane.append(n)}
@@ -1152,6 +1157,7 @@ function set(k,v){
   else if(k==='trim')applyTrim();
   else if(k==='place'){loadPano();targetNight=nightFor()}
   else if(k==='hour'){if(st.drive)drive&&drive.setHour(st.hour,false);else loadPano();targetNight=nightFor()}
+  else if(k==='dcam')frameView();
 }
 async function setView(id){
   if(!E.ready)return;
@@ -1254,7 +1260,7 @@ function resize(){if(!renderer)return;W=sec.clientWidth;H=sec.clientHeight;rende
 function frameView(){
   // En movimiento el auto se corre a la derecha (escritorio) o hacia arriba (celular) para dejar libre el título y el panel.
   camera.zoom=1;
-  if(st.drive&&st.view==='ext'&&W>=H)camera.setViewOffset(W,H,-W*.1,H*.02,W,H);
+  if(st.drive&&st.view==='ext'&&W>=H&&st.dcam==='side')camera.setViewOffset(W,H,-W*.1,H*.02,W,H);
   else if(st.view==='ext'){
     // Exterior: el auto se centra en el espacio libre entre el título (en celular) y el panel, y se aleja si ese espacio es bajo.
     const c=renderer.domElement.getBoundingClientRect(),d=$('vivDock').getBoundingClientRect(),hd=sec.querySelector('.viv-head').getBoundingClientRect();
@@ -1648,7 +1654,10 @@ const zoomFocus=new THREE.Vector3(...ZFOCUS.none),zGoal=new THREE.Vector3(),tgt=
 let tween=null,idle=0,dragging=false,steerX=0,carZ=0,vz=0,lastSteer=-1e9;
 const lv=new THREE.Vector3();
 function extPose(out,look){
-  if(st.drive){const port=W<H,steer=driveSteer;out.set(port?11.5:9.4,port?2.3:1.95,(port?8.8:7.1)-steer*.8);look.set(0,.8,carZ*.6);return}
+  if(st.drive){const port=W<H,steer=driveSteer;
+    if(st.dcam==='chase'){out.set(port?-13:-11,port?4:3.3,carZ-steer*.3);look.set(1.2,.9,carZ);return}
+    if(st.dcam==='aerial'){out.set(port?-10:-8,port?17:13,carZ+(port?3.5:4.5));look.set(.5,0,carZ);return}
+    out.set(port?11.5:9.4,port?2.3:1.95,(port?8.8:7.1)-steer*.8);look.set(0,.8,carZ*.6);return}
   const pol=Math.min(1.55,camState.pol+.07*zk),d=camState.dist*(1-.46*zk),s=Math.sin(pol);tgt.lerpVectors(camState.target,zoomFocus,zk);
   out.set(tgt.x+d*s*Math.sin(camState.az),tgt.y+d*Math.cos(pol),tgt.z+d*s*Math.cos(camState.az));look.copy(tgt)}
 function intPose(out,look){const e=EYES[st.view];out.copy(e.p);const cy=Math.cos(camState.pitch);look.set(e.p.x+Math.sin(camState.yaw)*cy,e.p.y+Math.sin(camState.pitch),e.p.z+Math.cos(camState.yaw)*cy);
