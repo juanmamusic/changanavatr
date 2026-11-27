@@ -168,19 +168,20 @@ p{margin:0}
 
 /* Colores */
 .colors{background:linear-gradient(180deg,var(--blush) 0%,#ece7ee 100%)}
-.stage{position:relative;aspect-ratio:2.25/1;max-width:1100px;margin:clamp(16px,3vw,32px) auto 0;overflow:hidden}
-.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 72%;opacity:0;transform:translateX(2%);transition:opacity 1.2s var(--ease),transform 1.6s var(--ease)}
+.colors{padding:clamp(64px,7vw,104px) 0}
+.stage{position:relative;aspect-ratio:2.9/1;width:min(100%,1100px,calc((100svh - 290px)*2.9));margin:clamp(8px,1.6vw,20px) auto 0;overflow:hidden}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 56%;opacity:0;transform:translateX(2%);transition:opacity 1.2s var(--ease),transform 1.6s var(--ease)}
 .stage img.on{opacity:1;transform:none}
 .stage img.ghost{filter:brightness(0) invert(14%)}
 .stage img.ghost.on{opacity:.07}
 .stage.soon::before{content:attr(data-soon);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:80%;text-align:center;font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);line-height:1.6}
-.sw-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px}
+.sw-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:0}
 .sw{width:44px;height:44px;border-radius:50%;border:1px solid rgba(42,36,48,.18);padding:4px;background:transparent;cursor:pointer;transition:border-color .4s,transform .4s}
 .sw i{display:block;width:100%;height:100%;border-radius:50%;box-shadow:inset 0 -6px 10px rgba(0,0,0,.18),inset 0 4px 8px rgba(255,255,255,.35)}
 .sw[aria-checked="true"]{border-color:var(--ink);transform:scale(1.06)}
 .sw:hover{border-color:rgba(42,36,48,.5)}
 .sw:focus-visible{outline:2px solid var(--caramel);outline-offset:3px}
-.cname{margin-top:22px;font-size:20px}
+.cname{margin-top:14px;font-size:20px}
 .cname small{display:block;font-size:13px;color:var(--mute);margin-top:6px}
 @media(min-width:768px){.sw-row{gap:14px}}
 
@@ -271,12 +272,13 @@ details[open] .pm::after{transform:translate(-50%,-50%) rotate(0)}
 /* Experiencia privada */
 .book{position:relative;overflow:hidden;background:#c9d6ea}
 .book-bg{position:absolute;inset:0}
-.book-bg img{width:100%;height:100%;object-fit:cover;object-position:50% 55%}
-.book::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(238,240,245,.88) 0%,rgba(238,240,245,.55) 48%,rgba(238,240,245,0) 80%)}
+.book-bg img{width:100%;height:100%;object-fit:cover;object-position:50% 55%;filter:blur(6px);transform:scale(1.04)}
+.book::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(246,247,250,.95) 0%,rgba(246,247,250,.78) 50%,rgba(246,247,250,.25) 85%)}
+.book .lead-t{color:var(--ink)}
 .book .wrap{position:relative;z-index:2}
 .bgrid{display:grid;gap:clamp(36px,5vw,72px);align-items:center}
 @media(min-width:992px){.bgrid{grid-template-columns:1fr 1fr}}
-@media(max-width:991px){.book::after{background:linear-gradient(180deg,rgba(238,240,245,.9) 0%,rgba(238,240,245,.75) 100%)}}
+@media(max-width:991px){.book::after{background:linear-gradient(180deg,rgba(246,247,250,.94) 0%,rgba(246,247,250,.82) 100%)}}
 .glass{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.75);border-radius:18px;padding:clamp(22px,3vw,36px);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);box-shadow:0 20px 60px rgba(42,36,48,.1)}
 .fld{margin-bottom:16px}
 .fld label,.fld legend{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:8px;float:none}
@@ -295,7 +297,7 @@ details[open] .pm::after{transform:translate(-50%,-50%) rotate(0)}
 .err{display:none;color:#a2453a;font-size:13px;margin-top:6px}
 .fld.bad .err{display:block}
 .fld.bad input{border-color:#c0675b}
-.fine{font-size:12.5px;color:var(--mute);margin-top:14px;line-height:1.5}
+.fine{font-size:13px;color:var(--ink-2);margin-top:14px;line-height:1.5}
 
 /* Footer */
 footer{background:var(--plum);color:#a69ea6;padding:64px 0 40px;font-size:14px}
@@ -523,7 +525,6 @@ en tu mundo.</h2>
 <!-- 3. EQUILIBRIO / ALIANZA -->
 <section class="sec" id="alianza">
   <div class="wrap center">
-    <p class="eyebrow rv" data-i18n="al_eye">Equilibrio</p>
     <h2 class="h-l manif rv d1" data-i18n="al_title">Todo lo que te rodea, en equilibrio.</h2>
     <p class="lead-t rv d2" style="max-width:58ch;margin:24px auto 0" data-i18n="al_lead">AVATR nace en 2018 de la unión de tres líderes, con una idea simple: que la tecnología más avanzada se sienta como calma.</p>
   </div>
@@ -548,7 +549,7 @@ en tu mundo.</h2>
       <img src="img/ext-trasera.webp" alt="AVATR 11 vista trasera" data-i18n-alt="a_t5" loading="lazy">
     </div>
     <div class="tour-head"><div class="wrap">
-      <p class="eyebrow" data-i18n="d_eye">Diseño</p>
+      <p class="eyebrow" data-i18n="d_eye">Diseño futurista</p>
       <h2 class="h-l" style="margin-top:14px;max-width:12ch" data-i18n="d_title">Rodéala con calma.</h2>
     </div></div>
     <div class="tour-cap"><div class="wrap">
@@ -578,8 +579,7 @@ en tu mundo.</h2>
 <!-- 6. COLORES -->
 <section class="sec colors" id="colores">
   <div class="wrap center">
-    <p class="eyebrow rv" data-i18n="c_eye">Colores</p>
-    <h2 class="h-l rv d1" style="margin-top:18px" data-i18n="c_title">Elige tu tono.</h2>
+    <h2 class="h-l rv d1"  data-i18n="c_title">Elige tu tono.</h2>
     <div class="stage rv d2" id="stage" aria-live="polite"></div>
     <div class="sw-row" role="radiogroup" aria-label="Color exterior" data-i18n-aria="c_aria" id="swatches"></div>
     <p class="cname" id="cname"></p>
@@ -589,8 +589,7 @@ en tu mundo.</h2>
 <!-- 7. MOMENTOS -->
 <section class="sec" id="momentos">
   <div class="wrap">
-    <p class="eyebrow rv" data-i18n="m_eye">Tu semana</p>
-    <h2 class="h-l rv d1" style="margin-top:18px;max-width:16ch" data-i18n="m_title">Del lunes al domingo, en calma.</h2>
+    <h2 class="h-l rv d1" style="max-width:16ch" data-i18n="m_title">Del lunes al domingo, en calma.</h2>
     <div class="moments">
       <article class="mcard rv"><img src="img/vida-playa.webp" alt="AVATR 11 blanca con una tabla de surf en la playa al atardecer" data-i18n-alt="a_beach" loading="lazy"><div class="tx"><p class="k" data-i18n="m1_k">Fin de semana</p><h3 data-i18n="m1_t">Espacio para lo que te mueve</h3><p data-i18n="m1_p">Hasta 625 km de autonomía para llegar lejos y volver sin prisa.</p></div></article>
       <article class="mcard rv d1"><img src="img/vida-ciudad.webp" alt="AVATR 11 negra en movimiento por una calle de la ciudad" data-i18n-alt="a_city" loading="lazy"><div class="tx"><p class="k" data-i18n="m2_k">Entre semana</p><h3 data-i18n="m2_t">El tráfico se siente distinto</h3><p data-i18n="m2_p">Cuando la cabina es silencio, el camino al trabajo también es tuyo.</p></div></article>
@@ -704,8 +703,7 @@ en tu mundo.</h2>
 <!-- 11. PROPIETARIOS -->
 <section class="sec" id="propietarios" style="background:linear-gradient(180deg,var(--pearl),var(--blush))">
   <div class="wrap">
-    <p class="eyebrow rv" data-i18n="o_eye">Propietarios</p>
-    <h2 class="h-l rv d1" style="margin-top:18px;max-width:18ch" data-i18n="o_title">La experiencia continúa después de la entrega.</h2>
+    <h2 class="h-l rv d1" style="max-width:18ch" data-i18n="o_title">La experiencia continúa después de la entrega.</h2>
     <div class="after">
       <div class="acard rv"><p class="k">Mi AVATR</p><h3 data-i18n="o1_t">Te avisamos cuándo toca tu servicio</h3><p data-i18n="o1_p">Con tu fecha de entrega y una foto de tu tablero calculamos tu próximo servicio. Lo agendas con un mensaje.</p></div>
       <div class="acard rv d1"><p class="k">OTA</p><h3 data-i18n="o2_t">Un auto que mejora con el tiempo</h3><p data-i18n="o2_p">Nuevas funciones y mejoras llegan por actualizaciones remotas, sin visitar el taller.</p></div>
@@ -807,7 +805,7 @@ al2_t:'Intelligence and power', al2_p:'The oil-cooled DriveONE propulsion system
 al3_t:'Safe energy', al3_p:'A 116 kWh battery with thermal runaway monitoring and early warnings from its management system.',
 al4_w:'Design', al4_t:'Conceived in Munich', al4_p:'Its design language was born at AVATR’s global design center in Germany.',
 a_tour:'A walk around the AVATR 11', a_t1:'AVATR 11 front view', a_t2:'AVATR 11 front view at 45 degrees', a_t3:'AVATR 11 side view', a_t4:'AVATR 11 rear view at 70 degrees', a_t5:'AVATR 11 rear view',
-d_eye:'Design', d_title:'Walk around it, calmly.',
+d_eye:'Futuristic design', d_title:'Walk around it, calmly.',
 a_det:'Front of the AVATR 11 in Liquid Caramel seen from above',
 lc_eye:'Liquid Caramel', lc_title:'A tone that changes with the light.',
 lc_lead:'Rosy at sunrise, golden at sunset. A warm color that goes with every hour of the day without drawing too much attention.',
@@ -1003,8 +1001,10 @@ onScroll();
   const hp=gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT).precision>0?'highp':'mediump';
   const VS='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const FS=`precision ${hp} float;uniform sampler2D T,M;uniform vec2 R,S,O;uniform float t,dpr;
+  float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hs(i),hs(i+vec2(1,0)),f.x),mix(hs(i+vec2(0,1)),hs(i+1.),f.x),f.y);}
   void main(){vec2 px=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y);vec2 uv=(px-O)/S;
-    vec4 m=texture2D(M,uv);float sea=m.r,gm=m.g;
+    vec4 m=texture2D(M,uv);float sea=m.r,gm=m.g,sky=m.b;
     float depth=clamp((uv.y-.62)/.19,0.,1.);float amp=mix(.15,1.,depth);
     vec2 d=vec2(sin(uv.y*700.-t*1.6+sin(uv.x*35.+t*.5)*2.5)*.0013,sin(uv.y*420.-t*2.1+sin(uv.x*60.-t*.6)*1.6)*.002+sin(uv.y*160.-t*.9+uv.x*18.)*.0009)*amp*sea;
     vec3 c=texture2D(T,uv+d).rgb;
@@ -1014,6 +1014,8 @@ onScroll();
     float k=uv.x+uv.y*.62;float cyc=mod(t,6.);float ctr=mix(.88,1.16,clamp(cyc/1.73,0.,1.));float on=step(cyc,1.85);
     float band=exp(-pow((k-ctr)/.0085,2.))*.6+exp(-pow((k-ctr)/.035,2.))*.16;
     c+=vec3(1.,.95,.86)*band*gm*on;
+    if(sky>.01){vec2 q=uv*vec2(2.2,6.5)+vec2(t*.012,0.);float n=0.,a=.5;for(int o=0;o<5;o++){n+=a*vn(q);q=q*2.03+vec2(1.7,9.2);a*=.5;}
+      float cl=smoothstep(.5,.82,n)*sky*smoothstep(.62,.25,uv.y);c=mix(c,vec3(1.,.985,.975),cl*.32);}
     vec2 ip=uv*vec2(2400.,1350.);float bird=0.;
     for(int i=0;i<6;i++){float fi=float(i);float sp=.010+fract(fi*.37)*.006;float ph=fract(fi*.173+t*sp);
       vec2 bp=vec2(mix(1150.,260.,ph),705.+fract(fi*.61)*95.+sin(t*.35+fi*1.7)*7.);float sz=7.+fract(fi*.83)*4.;
