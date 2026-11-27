@@ -1012,7 +1012,7 @@ onScroll();
   float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
   float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hs(i),hs(i+vec2(1,0)),f.x),mix(hs(i+vec2(0,1)),hs(i+1.),f.x),f.y);}
   void main(){vec2 px=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y);vec2 uv=(px-O)/S;
-    vec4 m=texture2D(M,uv);float sea=m.r,gm=m.g,sky=m.b;
+    vec4 m=texture2D(M,uv);float sea=m.r,gm=m.g,sky=m.b,pm=m.a;
     float depth=clamp((uv.y-.62)/.19,0.,1.);float amp=mix(.15,1.,depth);
     vec2 d=vec2(sin(uv.y*700.-t*1.6+sin(uv.x*35.+t*.5)*2.5)*.0013,sin(uv.y*420.-t*2.1+sin(uv.x*60.-t*.6)*1.6)*.002+sin(uv.y*160.-t*.9+uv.x*18.)*.0009)*amp*sea;
     vec3 c=texture2D(T,uv+d).rgb;
@@ -1024,6 +1024,8 @@ onScroll();
     c+=vec3(1.,.95,.86)*band*gm*on*.5;
     if(sky>.01){vec2 q=uv*vec2(2.2,6.5)+vec2(t*.012,0.);float n=0.,a=.5;for(int o=0;o<5;o++){n+=a*vn(q);q=q*2.03+vec2(1.7,9.2);a*=.5;}
       float cl=smoothstep(.5,.82,n)*sky*smoothstep(.62,.25,uv.y);c=mix(c,vec3(1.,.985,.975),cl*.32);}
+    if(pm>.01){float kp=uv.x+uv.y*.62;float cp=mod(t,11.);float cc=mix(.70,1.28,smoothstep(0.,7.,cp));
+      float pb=exp(-pow((kp-cc)/.05,2.))+exp(-pow((kp-cc+.07)/.012,2.))*.55;c+=(vec3(1.,.97,.92)-c)*pb*pm*.4;}
     vec2 ip=uv*vec2(2400.,1350.);float bird=0.;
     for(int i=0;i<6;i++){float fi=float(i);float sp=.010+fract(fi*.37)*.006;float ph=fract(fi*.173+t*sp);
       vec2 bp=vec2(mix(1150.,260.,ph),705.+fract(fi*.61)*95.+sin(t*.35+fi*1.7)*7.);float sz=7.+fract(fi*.83)*4.;
@@ -1038,10 +1040,10 @@ onScroll();
   const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const ap=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
   const U=n=>gl.getUniformLocation(pr,n),uR=U('R'),uS=U('S'),uO=U('O'),ut=U('t');
-  const tex=(unit,src)=>{const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,x);
+  const tex=(unit,src,fmt)=>{fmt=fmt||gl.RGB;const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,x);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src)};
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,fmt,fmt,gl.UNSIGNED_BYTE,src)};
   const mask=new Image();mask.src='img/pabellon-fx.png';
   const ready=im=>im.complete&&im.naturalWidth?Promise.resolve():new Promise((ok,ko)=>{im.addEventListener('load',ok,{once:true});im.addEventListener('error',ko,{once:true})});
   let W=0,H=0,run=false,vis=true,raf=0,t0=performance.now(),first=true;
@@ -1054,7 +1056,7 @@ onScroll();
     if(first){first=false;cv.classList.add('on')}raf=requestAnimationFrame(frame)}
   const go=()=>{if(run&&vis&&!raf)raf=requestAnimationFrame(frame)};
   Promise.all([ready(img),ready(mask)]).then(()=>{
-    tex(0,img);tex(1,mask);gl.uniform1i(U('T'),0);gl.uniform1i(U('M'),1);size();run=true;go();
+    tex(0,img);tex(1,mask,gl.RGBA);gl.uniform1i(U('T'),0);gl.uniform1i(U('M'),1);size();run=true;go();
     addEventListener('resize',()=>{size()},{passive:true});
     new IntersectionObserver(e=>{vis=e[0].isIntersecting;go()}).observe(cv);
     document.addEventListener('visibilitychange',()=>{vis=!document.hidden;go()});
