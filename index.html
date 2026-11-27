@@ -100,10 +100,15 @@ p{margin:0}
 .hero-tag{margin:clamp(14px,1.6vw,22px) 0 0;max-width:28ch;font-weight:300;font-size:clamp(21px,2.2vw,32px);line-height:1.22;color:#3d3644}
 .hero .lead-t{max-width:42ch;color:#3d3644}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.hero-ctas .sm-t{display:none}
 .scroll-hint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:2;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#4b4452;display:flex;flex-direction:column;align-items:center;gap:10px}
 .scroll-hint::after{content:"";width:1px;height:44px;background:linear-gradient(#4b4452,transparent);animation:drip 2.8s var(--ease) infinite}
 @keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
-@media(max-width:767px){.hero-img img{object-position:64% 60%}.hero-in{padding-top:112px}.hero::after{background:linear-gradient(180deg,rgba(214,222,236,.75) 0%,rgba(214,222,236,0) 55%,rgba(214,222,236,0) 74%,rgba(214,222,236,.92) 92%,#d6deec 100%)}.scroll-hint{display:none}}
+@media(max-width:767px){.hero-img img{object-position:64% 60%}.hero-in{padding-top:112px}.hero::after{background:linear-gradient(180deg,rgba(214,222,236,.75) 0%,rgba(214,222,236,0) 55%,rgba(214,222,236,0) 74%,rgba(214,222,236,.92) 92%,#d6deec 100%)}.scroll-hint{display:none}
+  .hero-in{height:100%;display:flex;flex-direction:column;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+  .hero-ctas{margin-top:auto;flex-wrap:nowrap;gap:10px}.hero-ctas .btn-a{flex:1 1 auto;justify-content:center;text-align:center;white-space:nowrap;padding-left:18px;padding-right:18px}.hero-ctas .btn-a.btn-p{flex-grow:1.4}
+  .hero-ctas .lg-t{display:none}.hero-ctas .sm-t{display:inline}.hero-ctas.rv{opacity:1;transform:none;animation:ctaIn .9s var(--ease) .5s both}}
+@keyframes ctaIn{from{opacity:0;transform:translateY(14px)}}
 
 /* Cifras */
 .stats-sec{background:linear-gradient(180deg,#e6e8ef,var(--pearl));padding:clamp(40px,6vw,72px) 0}
@@ -462,7 +467,7 @@ footer nav a:hover{color:#fff}
     <h1 class="hero-name rv">AVATR 11</h1>
     <p class="hero-tag rv d1" data-i18n="h_title">Inteligencia y serenidad en movimiento.</p>
     <div class="hero-ctas rv d3">
-      <a class="btn-a btn-p" href="#experiencia" data-i18n="h_cta1">Reserva tu experiencia privada</a>
+      <a class="btn-a btn-p" href="#experiencia"><span class="lg-t" data-i18n="h_cta1">Reserva tu experiencia privada</span><span class="sm-t" data-i18n="h_cta1m">Experiencia privada</span></a>
       <a class="btn-a btn-g" href="#alianza" data-i18n="h_cta2">Descubrir</a>
     </div>
   </div>
@@ -790,7 +795,7 @@ const T = {es:{}, en:{
 skip:'Skip to content', v_aria:'Picture it in your life: interactive 3D scene', v_loading:'Preparing your AVATR', v_eye:'Picture it in your life', v_title:'Your AVATR,\nin your world.', v_lead:'Choose the place, the time and the color. Then step in and take the wheel.', v_pausem:'Pause motion', v_fs:'Full screen', v_close:'Close', v_hint:'Drag to rotate', v_cta:'Book with this setup', v_exit:'Exit the car', n_design:'Design', n_colors:'Colors', n_interior:'Interior', n_tech:'Technology', n_specs:'Specs', n_cta:'Book an experience',
 a_hero:'AVATR 11 in Liquid Caramel in front of a seaside pavilion at sunset',
 h_title:'Intelligence and serenity, in motion.',
-h_cta1:'Book your private experience', h_cta2:'Discover', scroll:'Scroll', a_stats:'Key figures',
+h_cta1:'Book your private experience', h_cta1m:'Private experience', h_cta2:'Discover', scroll:'Scroll', a_stats:'Key figures',
 s1:'Combined power', s2:'Combined torque', s3:'Range (NEDC)', s4:'Charging from 0 to 80%',
 al_eye:'Balance', al_title:'Everything around you, in balance.',
 al_lead:'AVATR was founded in 2018 by three leaders with a simple idea: the most advanced technology should feel like calm.',
