@@ -96,7 +96,8 @@ p{margin:0}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(214,222,236,.6) 0%,rgba(214,222,236,0) 55%)}
 .hero-in{position:relative;z-index:2;padding-top:clamp(120px,20vh,200px)}
 .hero .eyebrow{color:var(--ink);opacity:.7}
-.hero h1{max-width:12ch;margin:18px 0 20px;font-size:clamp(38px,5.4vw,80px)}
+.hero-name{margin:0;font-weight:200;font-size:clamp(64px,10.5vw,168px);line-height:.92;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
+.hero-tag{margin:clamp(14px,1.6vw,22px) 0 0;max-width:28ch;font-weight:300;font-size:clamp(21px,2.2vw,32px);line-height:1.22;color:#3d3644}
 .hero .lead-t{max-width:42ch;color:#3d3644}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 .scroll-hint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:2;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#4b4452;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -458,9 +459,8 @@ footer nav a:hover{color:#fff}
     <img src="img/pabellon.webp" alt="AVATR 11 en Liquid Caramel frente a un pabellón junto al mar al atardecer" data-i18n-alt="a_hero" fetchpriority="high">
   </picture>
   <div class="wrap hero-in">
-    <p class="eyebrow rv" data-i18n="h_eye">AVATR 11 · SUV coupé 100 % eléctrica</p>
-    <h1 class="h-xl rv d1" data-i18n="h_title">Inteligencia y serenidad en movimiento.</h1>
-    <p class="lead-t rv d2" data-i18n="h_lead">Ingeniería de Changan, tecnología de Huawei y baterías de CATL, en un espacio pensado para que llegues en calma.</p>
+    <h1 class="hero-name rv">AVATR 11</h1>
+    <p class="hero-tag rv d1" data-i18n="h_title">Inteligencia y serenidad en movimiento.</p>
     <div class="hero-ctas rv d3">
       <a class="btn-a btn-p" href="#experiencia" data-i18n="h_cta1">Reserva tu experiencia privada</a>
       <a class="btn-a btn-g" href="#alianza" data-i18n="h_cta2">Descubrir</a>
@@ -789,8 +789,7 @@ const TOUR = {
 const T = {es:{}, en:{
 skip:'Skip to content', v_aria:'Picture it in your life: interactive 3D scene', v_loading:'Preparing your AVATR', v_eye:'Picture it in your life', v_title:'Your AVATR,\nin your world.', v_lead:'Choose the place, the time and the color. Then step in and take the wheel.', v_pausem:'Pause motion', v_fs:'Full screen', v_close:'Close', v_hint:'Drag to rotate', v_cta:'Book with this setup', v_exit:'Exit the car', n_design:'Design', n_colors:'Colors', n_interior:'Interior', n_tech:'Technology', n_specs:'Specs', n_cta:'Book an experience',
 a_hero:'AVATR 11 in Liquid Caramel in front of a seaside pavilion at sunset',
-h_eye:'AVATR 11 · All-electric coupé SUV', h_title:'Intelligence and serenity, in motion.',
-h_lead:'Changan engineering, Huawei technology and CATL batteries, in a space designed so you arrive at ease.',
+h_title:'Intelligence and serenity, in motion.',
 h_cta1:'Book your private experience', h_cta2:'Discover', scroll:'Scroll', a_stats:'Key figures',
 s1:'Combined power', s2:'Combined torque', s3:'Range (NEDC)', s4:'Charging from 0 to 80%',
 al_eye:'Balance', al_title:'Everything around you, in balance.',
