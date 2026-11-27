@@ -9,8 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="preload" as="image" href="img/pabellon.webp" media="(min-width:768px)">
-<link rel="preload" as="image" href="img/pabellon-m.webp" media="(max-width:767px)">
+<link rel="preload" as="image" href="img/pabellon.webp" fetchpriority="high">
 <style>
 /* Fotos y video: material oficial de AVATR entregado por el cliente (carpeta img/ y video/).
    Recortes de color y renders de tecnología: avatruae.com (AVATR EAU), referencia. */
@@ -91,7 +90,9 @@ p{margin:0}
 /* Hero */
 .hero{position:relative;height:100svh;min-height:640px;overflow:hidden;background:#c9d6ea}
 .hero picture,.hero-img{position:absolute;inset:0}
-.hero-img img{width:100%;height:100%;object-fit:cover;object-position:60% 62%;transform:scale(1.06);animation:breathe 22s var(--ease) forwards}
+.hero-img{transform:scale(1.06);animation:breathe 22s var(--ease) forwards}
+.hero-img img{width:100%;height:100%;object-fit:cover;object-position:60% 62%}
+#heroFx{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .8s ease}#heroFx.on{opacity:1}
 @keyframes breathe{to{transform:scale(1)}}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(214,222,236,.6) 0%,rgba(214,222,236,0) 55%)}
 .hero-in{position:relative;z-index:2;padding-top:clamp(120px,20vh,200px)}
@@ -459,10 +460,10 @@ footer nav a:hover{color:#fff}
 <main id="main">
 <!-- 1. HERO -->
 <section class="hero" id="inicio">
-  <picture class="hero-img">
-    <source media="(max-width:767px)" srcset="img/pabellon-m.webp">
-    <img src="img/pabellon.webp" alt="AVATR 11 en Liquid Caramel frente a un pabellón junto al mar al atardecer" data-i18n-alt="a_hero" fetchpriority="high">
-  </picture>
+  <div class="hero-img">
+    <img id="heroImg" src="img/pabellon.webp" alt="AVATR 11 en Liquid Caramel frente a un pabellón junto al mar al atardecer" data-i18n-alt="a_hero" fetchpriority="high">
+    <canvas id="heroFx" aria-hidden="true"></canvas>
+  </div>
   <div class="wrap hero-in">
     <h1 class="hero-name rv">AVATR 11</h1>
     <p class="hero-tag rv d1" data-i18n="h_title">Inteligencia y serenidad en movimiento.</p>
@@ -988,6 +989,59 @@ setLang(start);
 onScroll();
 </script>
 
+
+<script>
+/* Portada viva: oleaje sutil en el mar y un destello de sol que recorre los vidrios del auto.
+   Una sola capa WebGL sobre la foto; la máscara img/pabellon-fx.png marca el mar (rojo) y los vidrios (verde).
+   Si no hay WebGL o el usuario pide menos movimiento, queda la foto fija. */
+(()=>{
+  const img=document.getElementById('heroImg'),cv=document.getElementById('heroFx');
+  if(!img||!cv||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const gl=cv.getContext('webgl',{alpha:false,antialias:false,premultipliedAlpha:false,powerPreference:'low-power'});if(!gl)return;
+  const hp=gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT).precision>0?'highp':'mediump';
+  const VS='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  const FS=`precision ${hp} float;uniform sampler2D T,M;uniform vec2 R,S,O;uniform float t,dpr;
+  void main(){vec2 px=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y);vec2 uv=(px-O)/S;
+    vec4 m=texture2D(M,uv);float sea=m.r,gm=m.g;
+    float depth=clamp((uv.y-.62)/.19,0.,1.);float amp=mix(.15,1.,depth);
+    vec2 d=vec2(sin(uv.y*700.-t*1.3+sin(uv.x*35.+t*.4)*2.5)*.0007,sin(uv.y*420.-t*1.7+sin(uv.x*60.-t*.5)*1.6)*.0011)*amp*sea;
+    vec3 c=texture2D(T,uv+d).rgb;
+    vec2 g=(uv+d*3.)*vec2(300.,980.);vec2 id=floor(g),fc=fract(g)-.5;float h=fract(sin(dot(id,vec2(127.1,311.7)))*43758.5453);float sp=pow(max(0.,sin(t*(1.1+h*2.4)+h*60.)),14.)*smoothstep(.42,0.,length(fc*vec2(1.,1.8)))*step(.8,h);
+    float lum=dot(c,vec3(.3,.55,.15));float sun=mix(1.,.35,smoothstep(.05,.45,uv.x));
+    c+=vec3(1.,.92,.8)*sp*sea*smoothstep(.4,.75,lum)*.42*sun;
+    float k=uv.x+uv.y*.62;float cyc=mod(t,7.5);float ctr=mix(.88,1.16,clamp(cyc/2.6,0.,1.));float on=step(cyc,2.8);
+    float band=exp(-pow((k-ctr)/.0085,2.))*.6+exp(-pow((k-ctr)/.035,2.))*.16;
+    c+=vec3(1.,.95,.86)*band*gm*on;
+    gl_FragColor=vec4(c,1.);}`;
+  const sh=(ty,src)=>{const o=gl.createShader(ty);gl.shaderSource(o,src);gl.compileShader(o);return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null};
+  const v=sh(gl.VERTEX_SHADER,VS),f=sh(gl.FRAGMENT_SHADER,FS);if(!v||!f)return;
+  const pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return;gl.useProgram(pr);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(pr,n),uR=U('R'),uS=U('S'),uO=U('O'),ut=U('t');
+  const tex=(unit,src)=>{const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,x);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src)};
+  const mask=new Image();mask.src='img/pabellon-fx.png';
+  const ready=im=>im.complete&&im.naturalWidth?Promise.resolve():new Promise((ok,ko)=>{im.addEventListener('load',ok,{once:true});im.addEventListener('error',ko,{once:true})});
+  let W=0,H=0,run=false,vis=true,raf=0,t0=performance.now(),first=true;
+  function size(){const r={width:cv.offsetWidth,height:cv.offsetHeight},dpr=Math.min(devicePixelRatio||1,innerWidth<768?2:1.5);
+    W=Math.max(1,Math.round(r.width*dpr));H=Math.max(1,Math.round(r.height*dpr));cv.width=W;cv.height=H;gl.viewport(0,0,W,H);
+    const iw=img.naturalWidth,ih=img.naturalHeight,sc=Math.max(W/iw,H/ih),sw=iw*sc,shh=ih*sc;
+    const op=getComputedStyle(img).objectPosition.split(' ').map(x=>parseFloat(x)/100);
+    gl.uniform2f(uR,W,H);gl.uniform2f(uS,sw,shh);gl.uniform2f(uO,(W-sw)*op[0],(H-shh)*(op[1]??.5))}
+  function frame(now){raf=0;if(!run||!vis)return;gl.uniform1f(ut,(now-t0)/1000);gl.drawArrays(gl.TRIANGLES,0,3);
+    if(first){first=false;cv.classList.add('on')}raf=requestAnimationFrame(frame)}
+  const go=()=>{if(run&&vis&&!raf)raf=requestAnimationFrame(frame)};
+  Promise.all([ready(img),ready(mask)]).then(()=>{
+    tex(0,img);tex(1,mask);gl.uniform1i(U('T'),0);gl.uniform1i(U('M'),1);size();run=true;go();
+    addEventListener('resize',()=>{size()},{passive:true});
+    new IntersectionObserver(e=>{vis=e[0].isIntersecting;go()}).observe(cv);
+    document.addEventListener('visibilitychange',()=>{vis=!document.hidden;go()});
+  }).catch(()=>{});
+})();
+</script>
 <script type="module">
 /* ===== Imagínala en tu vida: escena 3D de la AVATR 11 =====
    Panoramas: pano/<lugar>-<hora>.jpg (4096 px) y pano/hd/ (6144 px, escritorio). Si falta la hora exacta se usa <lugar>-dia con ajuste de luz.
