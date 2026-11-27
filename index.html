@@ -109,7 +109,7 @@ p{margin:0}
 .hero .eyebrow{color:var(--ink);opacity:.7}
 .hero-name{margin:0;font-weight:200;font-size:clamp(64px,10.5vw,168px);line-height:.92;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
 @media(min-width:768px){.hero-name{font-size:clamp(64px,8.9vw,143px)}}
-.hero-tag{margin:clamp(14px,1.6vw,22px) 0 0;max-width:28ch;font-weight:300;font-size:clamp(21px,2.2vw,32px);line-height:1.22;color:#3d3644}
+.hero-tag{margin:clamp(14px,1.6vw,22px) 0 0;white-space:pre-line;font-weight:300;font-size:clamp(21px,2.2vw,32px);line-height:1.22;color:#3d3644}
 .hero .lead-t{max-width:42ch;color:#3d3644}
 .hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 .hero-ctas .sm-t{display:none}
@@ -499,7 +499,8 @@ footer nav a:hover{color:#fff}
   </div>
   <div class="wrap hero-in">
     <h1 class="hero-name rv">AVATR 11</h1>
-    <p class="hero-tag rv d1" data-i18n="h_title">Inteligencia y serenidad en movimiento.</p>
+    <p class="hero-tag rv d1" data-i18n="h_title">Inteligencia y serenidad
+en movimiento.</p>
     <div class="hero-ctas rv d3">
       <a class="btn-a btn-p" href="#experiencia"><span class="lg-t" data-i18n="h_cta1">Reserva tu experiencia privada</span><span class="sm-t" data-i18n="h_cta1m">Experiencia privada</span></a>
       <a class="btn-a btn-g" href="#alianza" data-i18n="h_cta2">Descubrir</a>
@@ -812,7 +813,7 @@ const TOUR = {
 const T = {es:{}, en:{
 skip:'Skip to content', v_aria:'Picture it in your life: interactive experience', v_loading:'Preparing your AVATR', v_eye:'Picture it in your life', vl_url:'Interactive experience', vl_t:'Interactive experience', v_title:'Your AVATR,\nin your world.', v_lead:'Choose the place, the time and the color. Then step in and take the wheel.', v_pausem:'Pause motion', v_fs:'Full screen', v_close:'Close', v_hint:'Drag to rotate', v_cta:'Book with this setup', v_exit:'Exit the car', n_design:'Design', n_colors:'Colors', n_interior:'Interior', n_tech:'Technology', n_specs:'Specs', n_cta:'Book an experience',
 a_hero:'AVATR 11 in Liquid Caramel in front of a seaside pavilion at sunset',
-h_title:'Intelligence and serenity, in motion.',
+h_title:'Intelligence and serenity,\nin motion.',
 h_cta1:'Book your private experience', h_cta1m:'Private experience', h_cta2:'Discover', scroll:'Scroll', a_stats:'Key figures',
 s1:'Combined power', s2:'Combined torque', s3:'Range (NEDC)', s4:'Charging from 0 to 80%',
 al_eye:'Balance', al_title:'Everything around you, in balance.',
