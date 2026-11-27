@@ -1034,7 +1034,7 @@ onScroll();
     if(sky>.01){vec2 q=uv*vec2(2.2,6.5)+vec2(t*.012,0.);float n=0.,a=.5;for(int o=0;o<5;o++){n+=a*vn(q);q=q*2.03+vec2(1.7,9.2);a*=.5;}
       float cl=smoothstep(.5,.82,n)*sky*smoothstep(.62,.25,uv.y);c=mix(c,vec3(1.,.985,.975),cl*.32);}
     if(pm>.01){float kp=uv.x+uv.y*.62;float cp=mod(t,11.);float cc=mix(.70,1.28,smoothstep(0.,7.,cp));
-      float pb=exp(-pow((kp-cc)/.05,2.))+exp(-pow((kp-cc+.07)/.012,2.))*.55;c+=(vec3(1.,.97,.92)-c)*pb*pm*.4;}
+      float pb=exp(-pow((kp-cc)/.05,2.))+exp(-pow((kp-cc+.07)/.012,2.))*.55;c+=(vec3(1.,.97,.92)-c)*pb*pm*.15;}
     vec2 ip=uv*vec2(2400.,1350.);float bird=0.;
     for(int i=0;i<6;i++){float fi=float(i);float sp=.010+fract(fi*.37)*.006;float ph=fract(fi*.173+t*sp);
       vec2 bp=vec2(mix(1150.,260.,ph),705.+fract(fi*.61)*95.+sin(t*.35+fi*1.7)*7.);float sz=7.+fract(fi*.83)*4.;
